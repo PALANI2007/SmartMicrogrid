@@ -1,103 +1,174 @@
 # Renewable-Aware Load Scheduler for Rural Microgrid
 
-## 📌 Project Overview
+## Intelligent Renewable-Aware Energy Management & Load Scheduling System
 
-The **Renewable-Aware Load Scheduler for Rural Microgrid** is a data-driven smart energy management system designed to improve the utilization of renewable energy in rural microgrids.
-
-The system uses **solar generation forecasting, load flexibility, battery status, load priorities, and scheduling constraints** to determine suitable operating times for flexible electrical loads.
-
-Instead of operating flexible loads at fixed times, the proposed system attempts to shift them toward periods where renewable energy availability is higher.
-
-The main objective is:
-
-> **Increase renewable energy self-consumption while maintaining essential loads, battery constraints, user deadlines, and operational requirements.**
+> **Academic Capstone Project & Smart Microgrid Reference**
+>
+> A data-driven renewable energy management system that combines solar generation forecasting, battery-aware scheduling, flexible load management, baseline comparison, uncertainty estimation, and explainable scheduling to improve renewable energy self-consumption in rural microgrids.
 
 ---
 
-## 🎯 Objectives
+## 🌟 Key Features
 
-The major objectives of this project are:
+1. **Smart Microgrid Dashboard**
+   - Renewable generation monitoring.
+   - Load demand visualization.
+   - Battery State of Charge (SOC) monitoring.
+   - Grid energy usage.
+   - Renewable self-consumption metrics.
+   - Renewable curtailment information.
+   - Overall microgrid operating status.
 
-- Forecast short-term solar power generation.
-- Analyze historical renewable generation and load demand.
-- Identify essential and flexible electrical loads.
-- Schedule flexible loads according to renewable availability.
-- Protect essential loads from unnecessary interruption.
-- Manage battery charging and discharging constraints.
-- Compare a traditional baseline scheduler with the renewable-aware scheduler.
-- Reduce grid energy dependency.
+2. **Machine Learning-Based Solar Forecasting**
+   - Historical solar generation analysis.
+   - Weather-aware feature engineering.
+   - Random Forest Regression forecasting.
+   - Chronological train/test split for time-series validation.
+   - Naive 24-hour lag baseline comparison.
+   - MAE, RMSE, and R² evaluation.
+   - Dynamic forecast uncertainty estimation.
+   - Prediction confidence information.
+
+3. **Renewable-Aware Load Scheduler**
+   - Forecast-driven flexible load scheduling.
+   - Essential load protection.
+   - Load priority handling.
+   - Flexible operating windows.
+   - Deadline and duration constraints.
+   - Renewable availability consideration.
+   - Battery-aware scheduling.
+   - Conflict handling.
+   - Explainable scheduling decisions.
+
+4. **Battery-Aware Energy Management**
+   - Battery capacity configuration.
+   - Minimum and maximum SOC constraints.
+   - Charging power limits.
+   - Discharging power limits.
+   - Charging/discharging efficiency.
+   - Battery impact calculation during scheduling.
+   - Protection against invalid battery operating states.
+
+5. **Baseline vs Smart Scheduler Benchmark**
+   - Baseline scheduler without renewable forecasts.
+   - Renewable-aware smart scheduler.
+   - Renewable self-consumption comparison.
+   - Grid energy comparison.
+   - Renewable curtailment comparison.
+   - Flexible-load completion comparison.
+   - Measurable improvement reporting.
+
+6. **Edge Case & Failure Analysis**
+   - Solar forecast error.
+   - Low battery condition.
+   - Flexible-load deadline conflicts.
+   - Sudden load spikes.
+   - Constraint violation prevention.
+   - Scheduler response analysis.
+
+7. **Explainable & Accessible Interface**
+   - English language support.
+   - Tamil language support.
+   - Explainable scheduling recommendations.
+   - Responsive web interface.
+   - Keyboard navigation.
+   - Semantic HTML.
+   - ARIA accessibility support.
+   - Screen-reader-friendly information.
+   - Status information not dependent only on color.
+
+---
+
+# 🎯 Project Objective
+
+Rural microgrids often combine renewable generation, energy storage, essential household loads, and flexible electrical loads.
+
+Renewable generation is variable and may not always match the time at which flexible loads are operated.
+
+The objective of this project is to develop a **renewable-aware load scheduling system** that uses solar generation forecasts and microgrid constraints to intelligently determine when flexible loads should operate.
+
+The system attempts to:
+
+- Increase renewable energy self-consumption.
+- Reduce unnecessary grid energy usage.
 - Reduce renewable energy curtailment.
-- Improve renewable self-consumption.
-- Handle forecast uncertainty and scheduling conflicts.
-- Provide an explainable scheduling decision for each load.
-- Provide an accessible web-based dashboard.
-- Support both **English and Tamil** interfaces.
-- Evaluate the system using measurable experiments.
+- Protect essential loads.
+- Respect flexible-load deadlines.
+- Maintain battery operating constraints.
+- Reduce unnecessary user disruption.
+- Provide understandable scheduling explanations.
 
 ---
 
-## 🏗️ System Architecture
+# 🏗️ System Architecture
 
 ```text
-                    ┌─────────────────────────┐
-                    │     Historical Data     │
-                    │                         │
-                    │ Solar Generation        │
-                    │ Weather Data            │
-                    │ Load Demand             │
-                    │ Battery SOC             │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │    Data Processing      │
-                    │                         │
-                    │ Cleaning                 │
-                    │ Feature Engineering      │
-                    │ Validation              │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ Solar Forecasting Model │
-                    │                         │
-                    │ Random Forest           │
-                    │ Regression              │
-                    └────────────┬────────────┘
-                                 │
-                    Solar Forecast + Uncertainty
-                                 │
-                                 ▼
-              ┌────────────────────────────────────┐
-              │ Renewable-Aware Load Scheduler    │
-              │                                    │
-              │ • Load Priority                    │
-              │ • Deadline                          │
-              │ • Duration                          │
-              │ • Battery Constraints               │
-              │ • Renewable Availability             │
-              │ • Essential Load Protection         │
-              └───────────────┬────────────────────┘
-                              │
-                              ▼
-                   ┌──────────────────────┐
-                   │ Scheduling Results   │
-                   │                      │
-                   │ Smart Schedule       │
-                   │ Battery Impact       │
-                   │ Grid Energy          │
-                   │ Curtailment          │
-                   │ Self-Consumption     │
-                   └────────────┬─────────┘
-                                │
-                                ▼
-                    ┌────────────────────────┐
-                    │      Web Dashboard     │
-                    │                        │
-                    │ Forecast               │
-                    │ Loads                  │
-                    │ Battery                │
-                    │ Scheduler              │
-                    │ Comparison             │
-                    │ Experiments            │
-                    └────────────────────────┘
+                         ┌───────────────────────────┐
+                         │      Historical Data      │
+                         │                           │
+                         │ • Solar Generation        │
+                         │ • Weather Data            │
+                         │ • Load Demand             │
+                         │ • Battery SOC             │
+                         └─────────────┬─────────────┘
+                                       │
+                                       ▼
+                         ┌───────────────────────────┐
+                         │     Data Processing       │
+                         │                           │
+                         │ • Data Cleaning           │
+                         │ • Feature Engineering     │
+                         │ • Time Features           │
+                         │ • Lag Features            │
+                         │ • Rolling Features        │
+                         └─────────────┬─────────────┘
+                                       │
+                                       ▼
+                         ┌───────────────────────────┐
+                         │   Solar Forecasting ML    │
+                         │                           │
+                         │ Random Forest Regression  │
+                         │ + Naive Baseline          │
+                         └─────────────┬─────────────┘
+                                       │
+                              Solar Forecast
+                              + Uncertainty
+                                       │
+                                       ▼
+              ┌────────────────────────────────────────────┐
+              │       Renewable-Aware Load Scheduler       │
+              │                                            │
+              │ • Renewable Availability                   │
+              │ • Load Priority                            │
+              │ • Duration                                 │
+              │ • Deadline                                 │
+              │ • Operating Window                         │
+              │ • Battery SOC                              │
+              │ • Power Constraints                        │
+              └──────────────────────┬─────────────────────┘
+                                     │
+                                     ▼
+                         ┌───────────────────────────┐
+                         │     Scheduling Output     │
+                         │                           │
+                         │ • Smart Schedule          │
+                         │ • Battery Impact          │
+                         │ • Grid Energy             │
+                         │ • Curtailment             │
+                         │ • Self-Consumption        │
+                         │ • Explanations            │
+                         └─────────────┬─────────────┘
+                                       │
+                                       ▼
+                         ┌───────────────────────────┐
+                         │       Web Dashboard       │
+                         │                           │
+                         │ • Dashboard               │
+                         │ • Forecast                │
+                         │ • Loads                   │
+                         │ • Battery                 │
+                         │ • Scheduler               │
+                         │ • Comparison              │
+                         │ • Experiments             │
+                         │ • Alerts                  │
+                         └───────────────────────────┘
