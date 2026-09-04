@@ -1,0 +1,2 @@
+capacity_kwh,initial_soc,minimum_soc,maximum_soc,max_charge_kw,max_discharge_kw,charging_efficiency,discharging_efficiency
+10,50.0,20.0,95.0,3.0,3.0,0.95,0.95

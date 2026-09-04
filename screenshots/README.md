@@ -1,0 +1,1 @@
+# Screenshots\n\nPlaceholder for application screenshots.
