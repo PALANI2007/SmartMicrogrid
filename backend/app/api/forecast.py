@@ -31,3 +31,8 @@ def actual_vs_predicted(days: int = Query(30), db: Session = Depends(get_db)):
 @router.get("/error-analysis")
 def error_analysis(db: Session = Depends(get_db)):
     return forecast_service.get_error_analysis(db)
+
+
+@router.get("/errors")
+def get_forecast_errors(db: Session = Depends(get_db)):
+    return forecast_service.get_error_distribution(db)

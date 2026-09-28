@@ -159,6 +159,25 @@ const en = {
     refresh: 'Refresh',
     submit: 'Submit',
   },
+  edgeCases: {
+    title: 'Edge Case Analysis',
+    runAll: 'Run All Edge Cases',
+    running: 'Running...',
+    noResults: 'No edge case results yet. Click Run All Edge Cases to begin.',
+    scenario: 'Scenario',
+    status: 'Status',
+    expected: 'Expected Behavior',
+    actual: 'Actual Behavior',
+    metrics: 'Metrics',
+    violations: 'Violations',
+    explanation: 'Explanation',
+    pass: 'PASS',
+    fail: 'FAIL',
+    monsoon: 'Cloud Cover / Monsoon',
+    lowBattery: 'Low Battery',
+    essentialSurge: 'Essential Load Surge',
+    deadlineConflict: 'Deadline Conflict',
+  },
 };
 export default en;
 export type TranslationKeys = typeof en;

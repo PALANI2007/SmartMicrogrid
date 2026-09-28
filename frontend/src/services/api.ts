@@ -55,3 +55,10 @@ export const validationApi = {
   submit: (data: ValidationResponse) => api.post('/api/validation', data).then(r => r.data),
   getAll: () => api.get('/api/validation').then(r => r.data),
 };
+export const edgeCasesApi = {
+  getResults: () => api.get('/api/edge-cases').then(r => r.data),
+  runAll: (scenario_id = 'all') => api.post('/api/edge-cases/run', { scenario_id }).then(r => r.data),
+};
+export const forecastErrorsApi = {
+  getErrorDistribution: () => api.get('/api/forecast/errors').then(r => r.data),
+};

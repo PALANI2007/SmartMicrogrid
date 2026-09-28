@@ -54,3 +54,69 @@ def test_smart_scheduler_load_spike(sample_loads, sample_forecast, sample_batter
     sample_loads.append({"id": 99, "name": "Spike", "load_type": "flexible", "power_kw": 10.0, "duration_hours": 1.0, "earliest_start": "12:00", "latest_finish": "13:00", "priority": "high"})
     schedules = scheduler.schedule(sample_loads, sample_forecast, sample_battery_config, "2024-01-01")
     assert len(schedules) == len(sample_loads)
+
+
+def test_edge_case_monsoon():
+    """Edge case: prolonged low solar (monsoon/cloud cover)"""
+    from scheduler.edge_cases import EdgeCaseSimulator
+    sim = EdgeCaseSimulator()
+    loads = [
+        {'id': 1, 'name': 'Refrigerator', 'load_type': 'essential', 'power_kw': 0.15,
+         'duration_hours': 24, 'earliest_start': None, 'latest_finish': None, 'priority': 'high'},
+        {'id': 2, 'name': 'Water Pump', 'load_type': 'flexible', 'power_kw': 1.5,
+         'duration_hours': 2, 'earliest_start': '07:00', 'latest_finish': '18:00', 'priority': 'medium'},
+    ]
+    battery = {'capacity_kwh': 10.0, 'initial_soc': 0.7, 'minimum_soc': 0.2,
+                'maximum_soc': 0.95, 'max_charge_kw': 3.0, 'max_discharge_kw': 3.0,
+                'charging_efficiency': 0.95, 'discharging_efficiency': 0.95}
+    result = sim.run_scenario('monsoon_cloud_cover', loads, battery)
+    assert result['status'] == 'PASS', f"Monsoon scenario failed: {result['explanation']}"
+    assert result['violations']['essential'] == 0
+
+
+def test_edge_case_low_battery():
+    """Edge case: low initial battery SOC"""
+    from scheduler.edge_cases import EdgeCaseSimulator
+    sim = EdgeCaseSimulator()
+    loads = [
+        {'id': 1, 'name': 'Medical Equipment', 'load_type': 'essential', 'power_kw': 0.2,
+         'duration_hours': 24, 'earliest_start': None, 'latest_finish': None, 'priority': 'high'},
+    ]
+    battery = {'capacity_kwh': 10.0, 'initial_soc': 0.22, 'minimum_soc': 0.2,
+                'maximum_soc': 0.95, 'max_charge_kw': 3.0, 'max_discharge_kw': 3.0,
+                'charging_efficiency': 0.95, 'discharging_efficiency': 0.95}
+    result = sim.run_scenario('low_battery', loads, battery)
+    assert result['status'] == 'PASS', f"Low battery scenario failed: {result['explanation']}"
+    assert result['violations']['battery'] == False
+
+
+def test_edge_case_essential_surge():
+    """Edge case: sudden essential load surge"""
+    from scheduler.edge_cases import EdgeCaseSimulator
+    sim = EdgeCaseSimulator()
+    loads = [
+        {'id': 1, 'name': 'Refrigerator', 'load_type': 'essential', 'power_kw': 0.15,
+         'duration_hours': 24, 'earliest_start': None, 'latest_finish': None, 'priority': 'high'},
+    ]
+    battery = {'capacity_kwh': 10.0, 'initial_soc': 0.6, 'minimum_soc': 0.2,
+                'maximum_soc': 0.95, 'max_charge_kw': 3.0, 'max_discharge_kw': 3.0,
+                'charging_efficiency': 0.95, 'discharging_efficiency': 0.95}
+    result = sim.run_scenario('essential_load_surge', loads, battery)
+    assert result['violations']['essential'] == 0
+    # Emergency load should be in schedule
+    scheduled_names = [s['load_name'] for s in result['schedule'] if s['status'] == 'SCHEDULED']
+    assert any('Emergency' in n or 'Medical' in n for n in scheduled_names)
+
+
+def test_edge_case_deadline_conflict():
+    """Edge case: flexible load deadline conflict (infeasible window)"""
+    from scheduler.edge_cases import EdgeCaseSimulator
+    sim = EdgeCaseSimulator()
+    loads = []  # EdgeCaseSimulator adds the infeasible load internally
+    battery = {'capacity_kwh': 10.0, 'initial_soc': 0.6, 'minimum_soc': 0.2,
+                'maximum_soc': 0.95, 'max_charge_kw': 3.0, 'max_discharge_kw': 3.0,
+                'charging_efficiency': 0.95, 'discharging_efficiency': 0.95}
+    result = sim.run_scenario('deadline_conflict', loads, battery)
+    conflict_loads = [s for s in result['schedule'] if s['status'] == 'CONFLICT']
+    assert len(conflict_loads) > 0, "Expected CONFLICT status for infeasible deadline"
+    assert conflict_loads[0]['explanation'] != '', "Expected non-empty explanation"

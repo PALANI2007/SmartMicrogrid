@@ -11,6 +11,7 @@ import Experiments from './pages/Experiments';
 import Alerts from './pages/Alerts';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import EdgeCases from './pages/EdgeCases';
 import './i18n';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="alerts" element={<Alerts />} />
           <Route path="settings" element={<Settings />} />
           <Route path="help" element={<Help />} />
+          <Route path="edge-cases" element={<EdgeCases />} />
         </Route>
       </Routes>
     </BrowserRouter>

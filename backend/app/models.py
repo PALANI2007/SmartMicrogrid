@@ -112,3 +112,16 @@ class ValidationResponse(Base):
     overall_satisfaction = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
     notes = Column(Text, nullable=True)
+
+class EdgeCaseResult(Base):
+    __tablename__ = "edge_case_results"
+    id = Column(Integer, primary_key=True, index=True)
+    scenario_id = Column(String, index=True)
+    name = Column(String)
+    status = Column(String)  # 'PASS' or 'FAIL'
+    smart_metrics = Column(Text)  # JSON string
+    baseline_metrics = Column(Text, nullable=True)  # JSON string
+    schedule_summary = Column(Text)  # JSON string
+    violations = Column(Text)  # JSON string
+    explanation = Column(Text)
+    run_at = Column(DateTime, default=datetime.utcnow)

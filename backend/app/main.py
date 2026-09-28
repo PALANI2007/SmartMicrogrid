@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from .config import get_settings
 from .database import init_db
 
-from .api import forecast, loads, battery, scheduler, baseline, experiments, dashboard, validation
+from .api import forecast, loads, battery, scheduler, baseline, experiments, dashboard, validation, edge_cases
 
 settings = get_settings()
 
@@ -26,6 +26,7 @@ app.include_router(baseline.router)
 app.include_router(experiments.router)
 app.include_router(dashboard.router)
 app.include_router(validation.router)
+app.include_router(edge_cases.router)
 
 @app.on_event("startup")
 def on_startup():

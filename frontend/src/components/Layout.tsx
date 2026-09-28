@@ -13,7 +13,8 @@ import {
   Settings, 
   HelpCircle,
   Menu,
-  X
+  X,
+  TriangleAlert,
 } from 'lucide-react';
 
 const Layout = () => {
@@ -35,6 +36,7 @@ const Layout = () => {
     { to: '/comparison', icon: <ArrowRightLeft size={20} />, label: t('nav.comparison') },
     { to: '/experiments', icon: <FlaskConical size={20} />, label: t('nav.experiments') },
     { to: '/alerts', icon: <BellRing size={20} />, label: t('nav.alerts') },
+    { to: '/edge-cases', icon: <TriangleAlert size={20} />, label: t('edgeCases.title') },
     { to: '/settings', icon: <Settings size={20} />, label: t('nav.settings') },
     { to: '/help', icon: <HelpCircle size={20} />, label: t('nav.help') },
   ];
