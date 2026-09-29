@@ -22,6 +22,8 @@ const Forecast = () => {
       const [forecastData, metricsData, errDist] = await Promise.all([
         forecastApi.getForecast(),
         forecastApi.getMetrics(),
+        // Non-critical: gracefully degrades to null if /api/forecast/errors is not yet available
+        // (e.g. model not yet trained or endpoint not deployed). Does not block the rest of the data load.
         forecastErrorsApi.getErrorDistribution().catch(() => null),
       ]);
       setData(forecastData);
@@ -136,7 +138,9 @@ const Forecast = () => {
         </p>
       </div>
 
-      {/* Model vs Baseline Comparison Table */}
+      {/* Model vs Baseline Comparison Table:
+          Compares the trained Random Forest (RF) model against a naive "last-value" baseline.
+          Lower MAE/RMSE and higher R² in the RF column confirms the ML model outperforms the baseline. */}
       {metrics && metrics.model && metrics.baseline && (
         <div className="card">
           <h2 className="text-lg font-semibold text-white mb-4">Model vs Naive Baseline</h2>

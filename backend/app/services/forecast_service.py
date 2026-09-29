@@ -15,6 +15,37 @@ sys.path.insert(0, PROJECT_ROOT)
 
 
 class ForecastService:
+    """
+    Service layer for solar generation forecasting.
+
+    Provides a unified interface for producing 24-hour hourly solar forecasts
+    and analysing model performance.  Forecasts are generated through a
+    three-level fallback chain:
+
+    1. **ML engine** (preferred): if a trained ``ForecastEngine`` model is
+       available, ``get_forecast()`` calls ``ForecastEngine.predict_for_date()``
+       which uses Random Forest predictions informed by historical same-month
+       weather patterns (see ``ml/forecast.py``).
+    2. **Database records** (secondary): if the ML engine is unavailable or
+       raises an exception, previously persisted ``Forecast`` ORM records for the
+       requested date are returned directly.
+    3. **Synthetic forecast** (fallback): if neither ML nor DB data is available,
+       a deterministic solar-curve forecast is generated from seasonal CSV
+       statistics (see ``_generate_synthetic_forecast()``).
+
+    Attributes
+    ----------
+    models_dir : str
+        Absolute path to the ``ml/models/`` directory.
+    metrics_file : str
+        Absolute path to ``ml/models/metrics.json`` (training metrics).
+    data_dir : str
+        Absolute path to the ``data/`` directory (contains ``processed/dataset.csv``).
+    _engine : ForecastEngine or None
+        Loaded ML inference engine; ``None`` if model files are absent or fail
+        to load.
+    """
+
     def __init__(self):
         self.models_dir = os.path.join(PROJECT_ROOT, "ml", "models")
         self.metrics_file = os.path.join(self.models_dir, "metrics.json")
@@ -33,7 +64,25 @@ class ForecastService:
             self._engine = None
 
     def _get_solar_df(self):
-        """Load solar generation CSV as DataFrame."""
+        """
+        Load the processed solar/weather dataset as a sorted DataFrame.
+
+        Reads ``data/processed/dataset.csv`` — the canonical processed dataset
+        produced by the data-preparation pipeline.  The file contains one row per
+        hourly observation with columns including ``timestamp``,
+        ``solar_generation_kw``, ``temperature_c``, ``humidity_pct``,
+        ``cloud_cover_pct``, ``wind_speed_ms``, and ``irradiance_wm2``.
+
+        The DataFrame is returned sorted by ``timestamp`` (ascending) so that
+        chronological operations (lag features, rolling windows) work correctly
+        without an explicit sort step in the caller.
+
+        Returns
+        -------
+        pd.DataFrame
+            Sorted weather/generation DataFrame, or an empty DataFrame if the
+            file does not exist.
+        """
         solar_path = os.path.join(self.data_dir, "processed", "dataset.csv")
         if not os.path.exists(solar_path):
             return pd.DataFrame()
@@ -43,7 +92,40 @@ class ForecastService:
         return df
 
     def get_forecast(self, db: Session, date_str: str = None) -> list:
-        """Get 24-hour hourly forecast for a given date."""
+        """
+        Return a 24-hour hourly solar generation forecast for the given date.
+
+        The method uses a three-level fallback chain to maximise reliability:
+
+        1. **ML engine** (preferred): if ``self._engine`` is loaded, the Random
+           Forest model predicts generation for each hour by aggregating historical
+           same-month weather patterns into synthetic feature rows and running
+           inference.  This is the most accurate path when the model has been
+           trained on sufficient data.
+        2. **Database records** (secondary): if the ML engine is unavailable or
+           raises an exception, the method queries the ``Forecast`` table for
+           records matching the requested date.  This path serves cached forecasts
+           stored by a previous run or populated externally.
+        3. **Synthetic forecast** (fallback): if neither ML nor DB data is
+           available, ``_generate_synthetic_forecast()`` is called to produce a
+           deterministic forecast based on seasonal CSV statistics or a simple
+           sinusoidal solar curve.
+
+        Parameters
+        ----------
+        db : Session
+            SQLAlchemy database session used for the DB-record fallback query.
+        date_str : str, optional
+            Target date in ``YYYY-MM-DD`` format.  Defaults to today's date if
+            omitted.
+
+        Returns
+        -------
+        list[dict]
+            24 dicts (one per hour, indexed 0–23) with keys: ``timestamp``,
+            ``hour``, ``predicted_generation_kw``, ``lower_bound_kw``,
+            ``upper_bound_kw``, ``confidence_score``, ``actual_generation_kw``.
+        """
         if date_str is None:
             date_str = datetime.now().strftime("%Y-%m-%d")
 
