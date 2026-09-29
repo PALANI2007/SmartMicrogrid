@@ -315,7 +315,40 @@ class ForecastService:
         }
 
     def get_error_distribution(self, db: Session) -> dict:
-        """Compute forecast error distribution from model predictions on test data."""
+        """
+        Compute the empirical forecast error distribution on the held-out test set.
+
+        This method reproduces *exactly* the same feature engineering and
+        chronological 80/20 train/test split that was used during model training
+        (see ``ml/train_forecast.py``), then runs the trained model on the test
+        portion to obtain predictions.  Using the identical split ensures that the
+        reported error statistics reflect true out-of-sample generalisation
+        performance rather than in-sample fit.
+
+        Feature engineering applied here:
+        ``hour``, ``day_of_week``, ``month``, ``is_daytime``, ``solar_lag_1h``,
+        ``solar_lag_2h``, ``solar_lag_24h``, ``solar_rolling_3h``,
+        ``solar_rolling_6h``.
+
+        If the ML engine is unavailable or the dataset is empty, the method falls
+        back to the *actual-vs-predicted* records from ``get_actual_vs_predicted()``
+        (last 60 days), which may include synthetic/noisy predictions.
+
+        Parameters
+        ----------
+        db : Session
+            SQLAlchemy database session (passed to fallback methods if needed).
+
+        Returns
+        -------
+        dict
+            Keys: ``mean_error``, ``median_error``, ``std_error``, ``min_error``,
+            ``max_error``, ``mae``, ``rmse``, ``percentiles`` (p5–p95),
+            ``error_histogram`` (20-bin), ``actual_vs_predicted`` (sampled),
+            ``test_period_start``, ``test_period_end``, ``n_test_samples``,
+            ``source`` (``"ml_model"`` or ``"actual_vs_predicted_fallback"``).
+            Returns ``{"error": str}`` on failure.
+        """
         df = self._get_solar_df()
         if df.empty or self._engine is None:
             # Fall back to error analysis from actual-vs-predicted records
